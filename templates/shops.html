@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shops</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; padding:24px; }
+    .wrap { max-width: 1100px; margin:auto; }
+    .card { background:#111827; border:1px solid #334155; border-radius:14px; padding:20px; margin-bottom:20px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    label { display:block; margin-bottom:6px; color:#94a3b8; }
+    input, select, textarea, button { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #334155; background:#0b1220; color:#e5e7eb; }
+    button { background:#22c55e; color:#04120a; font-weight:bold; border:none; cursor:pointer; margin-top:10px; }
+    .secondary { background:#1f2937; color:#e5e7eb; }
+    .item { background:#0b1220; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:12px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .row > * { flex:1; }
+    pre { background:#0b1220; border:1px solid #334155; padding:14px; border-radius:10px; white-space:pre-wrap; }
+    a { color: #93c5fd; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Shops</h1>
+      <p>Browse shops, filter results, and create shop entries.</p>
+    </div>
+
+    <div class="card">
+      <h2>Create Shop</h2>
+      <div class="grid">
+        <div>
+          <label>Name</label>
+          <input id="shopName" placeholder="Shop name" />
+        </div>
+        <div>
+          <label>Category</label>
+          <input id="shopCategory" placeholder="pharmacy / grocery / bakery" />
+        </div>
+        <div>
+          <label>Latitude</label>
+          <input id="shopLat" type="number" step="any" />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="shopLng" type="number" step="any" />
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <label>Details</label>
+        <textarea id="shopDetails" placeholder="Description, contact info, notes..."></textarea>
+      </div>
+      <button onclick="createShop()">Create Shop</button>
+      <pre id="createShopResult"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Find Shops</h2>
+      <div class="grid">
+        <div>
+          <label>Category</label>
+          <input id="filterCategory" placeholder="optional" />
+        </div>
+        <div>
+          <label>Open Status</label>
+          <select id="filterOpen">
+            <option value="">Any</option>
+            <option value="true">Open</option>
+            <option value="false">Closed</option>
+          </select>
+        </div>
+        <div>
+          <label>Search</label>
+          <input id="filterSearch" placeholder="name or details" />
+        </div>
+        <div>
+          <label>Latitude</label>
+          <input id="filterShopLat" type="number" step="any" />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="filterShopLng" type="number" step="any" />
+        </div>
+        <div>
+          <label>Radius (km)</label>
+          <input id="filterShopRadius" type="number" step="any" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:16px;">
+        <button onclick="loadShops()">Load Shops</button>
+        <button class="secondary" onclick="loadPharmacies()">Load Pharmacies</button>
+      </div>
+      <div id="shopsList" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <script>
+    async function createShop() {
+      const payload = {
+        name: document.getElementById("shopName").value,
+        category: document.getElementById("shopCategory").value,
+        lat: parseFloat(document.getElementById("shopLat").value),
+        lng: parseFloat(document.getElementById("shopLng").value),
+        details: document.getElementById("shopDetails").value
+      };
+
+      try {
+        const res = await fetch("/api/shops", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        document.getElementById("createShopResult").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("createShopResult").textContent = err.message;
+      }
+    }
+
+    async function loadShops() {
+      const params = new URLSearchParams();
+      const category = document.getElementById("filterCategory").value;
+      const isOpen = document.getElementById("filterOpen").value;
+      const search = document.getElementById("filterSearch").value;
+      const lat = document.getElementById("filterShopLat").value;
+      const lng = document.getElementById("filterShopLng").value;
+      const radius = document.getElementById("filterShopRadius").value;
+
+      if (category) params.append("category", category);
+      if (isOpen) params.append("is_open", isOpen);
+      if (search) params.append("search", search);
+      if (lat) params.append("lat", lat);
+      if (lng) params.append("lng", lng);
+      if (radius) params.append("radius_km", radius);
+
+      const res = await fetch(`/api/shops?${params.toString()}`);
+      const data = await res.json();
+      renderShops(data);
+    }
+
+    async function loadPharmacies() {
+      const params = new URLSearchParams();
+      const isOpen = document.getElementById("filterOpen").value;
+      const lat = document.getElementById("filterShopLat").value;
+      const lng = document.getElementById("filterShopLng").value;
+      const radius = document.getElementById("filterShopRadius").value;
+
+      if (isOpen) params.append("is_open", isOpen);
+      if (lat) params.append("lat", lat);
+      if (lng) params.append("lng", lng);
+      if (radius) params.append("radius_km", radius);
+
+      const res = await fetch(`/api/shops/pharmacies?${params.toString()}`);
+      const data = await res.json();
+      renderShops(data);
+    }
+
+    function renderShops(items) {
+      const container = document.getElementById("shopsList");
+      if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML = "<div class='item'>No shops found.</div>";
+        return;
+      }
+
+      container.innerHTML = items.map(shop => `
+        <div class="item">
+          <h3>${shop.name || "Unnamed shop"}</h3>
+          <div><strong>Category:</strong> ${shop.category || "-"}</div>
+          <div><strong>Open:</strong> ${shop.is_open ?? "-"}</div>
+          <div><strong>Location:</strong> ${shop.lat ?? "-"}, ${shop.lng ?? "-"}</div>
+          <div style="margin-top:10px;">
+            <a href="shop-detail.html?id=${shop.id || shop.shop_id}">Open details</a>
+          </div>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>

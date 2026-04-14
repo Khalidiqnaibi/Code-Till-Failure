@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auth</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; padding:24px; }
+    .wrap { max-width: 900px; margin:auto; }
+    .card { background:#111827; border:1px solid #334155; border-radius:14px; padding:20px; margin-bottom:20px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    label { display:block; margin-bottom:6px; color:#94a3b8; }
+    input, button { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #334155; background:#0b1220; color:#e5e7eb; }
+    button { background:#22c55e; color:#04120a; font-weight:bold; border:none; cursor:pointer; margin-top:10px; }
+    pre { background:#0b1220; border:1px solid #334155; padding:14px; border-radius:10px; white-space:pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Authentication</h1>
+      <p>Check user existence, verification, and status.</p>
+    </div>
+
+    <div class="card">
+      <h2>Check User Exists</h2>
+      <div class="grid">
+        <div>
+          <label>User ID</label>
+          <input id="existsUserId" placeholder="user123" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input id="existsPassword" type="password" placeholder="••••••••" />
+        </div>
+        <div>
+          <label>Display Name</label>
+          <input id="existsDisplayName" placeholder="user" />
+        </div>
+      </div>
+      <button onclick="checkExists()">Submit</button>
+      <pre id="existsResult"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Check Verification</h2>
+      <div class="grid">
+        <div>
+          <label>Domain</label>
+          <input id="verifiedDomain" placeholder="example.com" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input id="verifiedEmail" placeholder="user@example.com" />
+        </div>
+      </div>
+      <button onclick="checkVerified()">Submit</button>
+      <pre id="verifiedResult"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Get User Status</h2>
+      <div class="grid">
+        <div>
+          <label>Domain</label>
+          <input id="statusDomain" placeholder="example.com" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input id="statusEmail" placeholder="user@example.com" />
+        </div>
+      </div>
+      <button onclick="getStatus()">Submit</button>
+      <pre id="statusResult"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function postData(url, payload, outputId) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        document.getElementById(outputId).textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById(outputId).textContent = err.message;
+      }
+    }
+
+    function checkExists() {
+      postData("/api/auth/exists", {
+        user_id: document.getElementById("existsUserId").value,
+        password: document.getElementById("existsPassword").value,
+        display_name: document.getElementById("existsDisplayName").value || "user"
+      }, "existsResult");
+    }
+
+    function checkVerified() {
+      postData("/api/auth/verified", {
+        domain: document.getElementById("verifiedDomain").value,
+        email: document.getElementById("verifiedEmail").value
+      }, "verifiedResult");
+    }
+
+    function getStatus() {
+      postData("/api/auth/status", {
+        domain: document.getElementById("statusDomain").value,
+        email: document.getElementById("statusEmail").value
+      }, "statusResult");
+    }
+  </script>
+</body>
+</html>

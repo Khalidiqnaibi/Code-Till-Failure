@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Road Reports</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; padding:24px; }
+    .wrap { max-width: 1100px; margin:auto; }
+    .card { background:#111827; border:1px solid #334155; border-radius:14px; padding:20px; margin-bottom:20px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    label { display:block; margin-bottom:6px; color:#94a3b8; }
+    input, select, textarea, button { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #334155; background:#0b1220; color:#e5e7eb; }
+    button { background:#22c55e; color:#04120a; font-weight:bold; border:none; cursor:pointer; margin-top:10px; }
+    .secondary { background:#1f2937; color:#e5e7eb; }
+    .item { background:#0b1220; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:12px; }
+    pre { background:#0b1220; border:1px solid #334155; padding:14px; border-radius:10px; white-space:pre-wrap; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .row > * { flex:1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Road Reports</h1>
+      <p>Create and browse reports, checkpoints, and gas stations.</p>
+    </div>
+
+    <div class="card">
+      <h2>Create Road Report</h2>
+      <div class="grid">
+        <div>
+          <label>Report Type</label>
+          <input id="reportType" placeholder="checkpoint / closure / traffic" />
+        </div>
+        <div>
+          <label>Latitude</label>
+          <input id="reportLat" type="number" step="any" placeholder="31.7683" />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="reportLng" type="number" step="any" placeholder="35.2137" />
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <label>Description</label>
+        <textarea id="reportDescription" placeholder="Describe the road issue..."></textarea>
+      </div>
+      <button onclick="createReport()">Create Report</button>
+      <pre id="createRoadResult"></pre>
+    </div>
+
+    <div class="card">
+      <h2>Search Road Reports</h2>
+      <div class="grid">
+        <div>
+          <label>Report Type</label>
+          <input id="filterReportType" placeholder="optional" />
+        </div>
+        <div>
+          <label>Verified Only</label>
+          <select id="filterVerified">
+            <option value="">Any</option>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </div>
+        <div>
+          <label>Latitude</label>
+          <input id="filterLat" type="number" step="any" placeholder="optional" />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="filterLng" type="number" step="any" placeholder="optional" />
+        </div>
+        <div>
+          <label>Radius (km)</label>
+          <input id="filterRadius" type="number" step="any" placeholder="optional" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:16px;">
+        <button onclick="loadReports()">Load Reports</button>
+        <button class="secondary" onclick="loadCheckpoints()">Load Checkpoints</button>
+        <button class="secondary" onclick="loadGasStations()">Load Gas Stations</button>
+      </div>
+      <div id="roadsList" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <script>
+    async function createReport() {
+      const payload = {
+        report_type: document.getElementById("reportType").value,
+        lat: parseFloat(document.getElementById("reportLat").value),
+        lng: parseFloat(document.getElementById("reportLng").value),
+        description: document.getElementById("reportDescription").value
+      };
+
+      try {
+        const res = await fetch("/api/roads/reports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        document.getElementById("createRoadResult").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("createRoadResult").textContent = err.message;
+      }
+    }
+
+    async function loadReports() {
+      const params = new URLSearchParams();
+      const reportType = document.getElementById("filterReportType").value;
+      const verified = document.getElementById("filterVerified").value;
+      const lat = document.getElementById("filterLat").value;
+      const lng = document.getElementById("filterLng").value;
+      const radius = document.getElementById("filterRadius").value;
+
+      if (reportType) params.append("report_type", reportType);
+      if (verified) params.append("verified_only", verified);
+      if (lat) params.append("lat", lat);
+      if (lng) params.append("lng", lng);
+      if (radius) params.append("radius_km", radius);
+
+      const res = await fetch(`/api/roads/reports?${params.toString()}`);
+      const data = await res.json();
+      renderItems(data);
+    }
+
+    async function loadCheckpoints() {
+      const res = await fetch("/api/roads/checkpoints");
+      const data = await res.json();
+      renderItems(data);
+    }
+
+    async function loadGasStations() {
+      const res = await fetch("/api/roads/gas-stations");
+      const data = await res.json();
+      renderItems(data);
+    }
+
+    function renderItems(items) {
+      const container = document.getElementById("roadsList");
+      if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML = "<div class='item'>No results found.</div>";
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="item">
+          <h3>${item.report_type || item.name || "Untitled"}</h3>
+          <div><strong>ID:</strong> ${item.id || item.report_id || "-"}</div>
+          <div><strong>Status:</strong> ${item.status || "-"}</div>
+          <div><strong>Location:</strong> ${item.lat ?? "-"}, ${item.lng ?? "-"}</div>
+          <pre>${JSON.stringify(item, null, 2)}</pre>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>

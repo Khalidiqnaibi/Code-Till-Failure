@@ -1,157 +1,171 @@
-<!-- ================= AUTH ROUTES ================= -->
-
-<!-- Check User Exists -->
 <!DOCTYPE html>
-<html>
-<head><title>Check User Exists</title></head>
-<body>
-<h2>Check User Exists</h2>
-<form id="existsForm">
-  <input type="text" id="user_id" placeholder="User ID" required><br>
-  <input type="password" id="password" placeholder="Password" required><br>
-  <input type="text" id="display_name" placeholder="Display Name"><br>
-  <button type="submit">Send</button>
-</form>
-<pre id="result"></pre>
-<script>
-document.getElementById('existsForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const res = await fetch('/api/auth/exists', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      user_id: user_id.value,
-      password: password.value,
-      display_name: display_name.value
-    })
-  });
-  result.textContent = JSON.stringify(await res.json(), null, 2);
-};
-</script>
-</body>
-</html>
-
-<!-- ================= ROADS ================= -->
-
-<!-- Create Road Report -->
-<!DOCTYPE html>
-<html>
-<head><title>Create Road Report</title></head>
-<body>
-<h2>Create Report</h2>
-<form id="createReport">
-  <input type="text" id="type" placeholder="Report Type"><br>
-  <input type="text" id="description" placeholder="Description"><br>
-  <button>Create</button>
-</form>
-<pre id="output"></pre>
-<script>
-document.getElementById('createReport').onsubmit = async (e)=>{
-  e.preventDefault();
-  const res = await fetch('/api/roads/reports',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      type: type.value,
-      description: description.value
-    })
-  });
-  output.textContent = JSON.stringify(await res.json(),null,2);
-}
-</script>
-</body>
-</html>
-
-<!-- Get All Reports -->
-<!DOCTYPE html>
-<html>
-<head><title>All Reports</title></head>
-<body>
-<h2>Reports</h2>
-<button onclick="loadReports()">Load</button>
-<pre id="reports"></pre>
-<script>
-async function loadReports(){
-  const res = await fetch('/api/roads/reports');
-  reports.textContent = JSON.stringify(await res.json(),null,2);
-}
-</script>
-</body>
-</html>
-
-<!-- ================= SHOPS ================= -->
-
-<!-- Create Shop -->
-<!DOCTYPE html>
-<html>
-<head><title>Create Shop</title></head>
-<body>
-<h2>Create Shop</h2>
-<form id="shopForm">
-  <input type="text" id="name" placeholder="Shop Name"><br>
-  <input type="text" id="category" placeholder="Category"><br>
-  <button>Create</button>
-</form>
-<pre id="shopResult"></pre>
-<script>
-document.getElementById('shopForm').onsubmit = async (e)=>{
-  e.preventDefault();
-  const res = await fetch('/api/shops',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({name:name.value,category:category.value})
-  });
-  shopResult.textContent = JSON.stringify(await res.json(),null,2);
-}
-</script>
-</body>
-</html>
-
-<!-- Get Shops -->
-<!DOCTYPE html>
-<html>
-<head><title>All Shops</title></head>
-<body>
-<h2>Shops</h2>
-<button onclick="loadShops()">Load Shops</button>
-<pre id="shops"></pre>
-<script>
-async function loadShops(){
-  const res = await fetch('/api/shops');
-  shops.textContent = JSON.stringify(await res.json(),null,2);
-}
-</script>
-</body>
-</html>
-
-<!-- ================= GENERIC TEMPLATE ================= -->
-
-<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Generic API Tester</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code-Till-Failure</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --primary: #22c55e;
+      --danger: #ef4444;
+      --border: #334155;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 16px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    nav {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 12px;
+      background: var(--panel-2);
+      border-radius: 8px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 16px 40px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      background: var(--primary);
+      color: #04120a;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    button.secondary {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    .result, .list {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .item {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: #0b1220;
+    }
+
+    .item h3 {
+      margin: 0 0 8px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .danger {
+      background: var(--danger);
+      color: white;
+    }
+  </style>
 </head>
 <body>
-<h2>API Tester</h2>
-<input id="url" placeholder="Endpoint URL"><br>
-<select id="method">
-  <option>GET</option>
-  <option>POST</option>
-  <option>PUT</option>
-  <option>DELETE</option>
-</select><br>
-<textarea id="body" placeholder="JSON Body"></textarea><br>
-<button onclick="send()">Send</button>
-<pre id="res"></pre>
-<script>
-async function send(){
-  const resq = await fetch(url.value,{
-    method: method.value,
-    headers:{'Content-Type':'application/json'},
-    body: method.value==='GET'?null:body.value
-  });
-  res.textContent = JSON.stringify(await resq.json(),null,2);
-}
-</script>
+  <header>
+    <h1>Code-Till-Failure</h1>
+    <nav>
+      <a href="auth.html">Auth</a>
+      <a href="roads.html">Roads</a>
+      <a href="shops.html">Shops</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Welcome</h2>
+      <p class="muted">Choose a section above to manage users, road reports, and shops.</p>
+    </div>
+  </main>
 </body>
 </html>
