@@ -1,0 +1,4 @@
+supabase
+flsak
+flask-cors
+pytest
