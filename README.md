@@ -1,6 +1,4 @@
-Here's the rewritten product document:
 
----
 
 ## Hebron Guide — Product Document
 
