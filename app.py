@@ -8,25 +8,37 @@ import os
 
 from flask import Flask , render_template
 from routes.auth import auth_blueprint
+from flask_cors import CORS
 # from routes.doc_route import doc_blueprint
 # from routes.shop_route import shop_blueprint
 # from routes.ticket_route import ticket_blueprint
 
 from dotenv import load_dotenv
 
+from routes.tickets   import tickets_bp
+from routes.documents import documents_bp
+from routes.roads     import roads_bp
+from routes.shops     import shops_bp
 
-load_dotenv()
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
+    app.secret_key = os.environ.get("SECRET")
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET")
+    # Register all module blueprints
+    app.register_blueprint(tickets_bp)
+    app.register_blueprint(documents_bp)
+    app.register_blueprint(roads_bp)
+    app.register_blueprint(shops_bp)
 
-app.register_blueprint(auth_blueprint, url_prefix="/auth")
- 
+    @app.get("/health")
+    def health():
+        return {"status": "ok", "app": "Hebron Guide API"}
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+    return app
 
 
 if __name__ == "__main__":
-    app.run(debug=True ,port=5000 , host= "0.0.0.0")
+    app = create_app()
+    app.run(debug=True, port=5000)
+    
