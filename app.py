@@ -37,6 +37,12 @@ app.config.setdefault("adapter", adapter)
 def health():
     return {"status": "ok", "app": "Hebron Guide API"}
 
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+
 
 
 
