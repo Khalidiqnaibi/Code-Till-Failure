@@ -1,4 +1,11 @@
 supabase
-flsak
 flask-cors
 pytest
+torch>=2.0.0
+torchvision>=0.15.0
+timm>=1.0.0
+Pillow>=9.0.0
+tqdm>=4.65.0
+kaggle>=1.6.0
+roboflow>=1.1.0
+scikit-learn>=1.2.0

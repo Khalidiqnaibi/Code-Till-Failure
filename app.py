@@ -11,10 +11,10 @@ from routes.auth import auth_blueprint
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-from .routes.ticket_route   import tickets_bp
-from .routes.doc_route import documents_bp
-from .routes.roads_route     import roads_bp
-from .routes.shop_route     import shops_bp
+from routes.ticket_route   import tickets_bp
+from routes.doc_route import documents_bp
+from routes.roads_route     import roads_bp
+from routes.shop_route     import shops_bp
 
 def create_app():
     app = Flask(__name__)
