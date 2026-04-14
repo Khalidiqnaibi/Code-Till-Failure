@@ -1,3 +1,9 @@
+'''
+The entry point to to the app 
+
+architechure : use flask for backend and react native for the frontend app
+'''
+
 from flask import Flask , render_template
 from dotenv import load_dotenv
 

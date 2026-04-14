@@ -1,0 +1,3 @@
+supabase
+flsak
+flask-cors
