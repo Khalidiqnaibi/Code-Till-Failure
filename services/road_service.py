@@ -65,7 +65,6 @@ def create_report(data: dict) -> tuple[dict, int]:
         "severity":    data.get("severity", "medium"),
         "match_count": 0,
         "is_verified": False,
-        "is_active":   True,
     }
 
     result = supabase.table("road_reports").insert(payload).execute()
