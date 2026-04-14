@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from db_adapter import SupabaseAdapter
+from supabase_adapter import SupabaseAdapter
 
 
 # ---------------------------------------------------------------------------

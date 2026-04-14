@@ -1,6 +1,6 @@
 """
-db_adapter.py
--------------
+supabase_adapter.py
+-------------------
 Supabase database adapter for the Hebron Guide application.
 
 Provides a clean, typed interface over the Supabase Python client for all four
@@ -234,7 +234,6 @@ class SupabaseAdapter:
 
         Example:
             result = adapter.get_document_template("tmpl-uuid-here")
-        
         """
         if not template_id:
             return self._err("template_id cannot be empty")
@@ -636,6 +635,105 @@ class SupabaseAdapter:
         if error:
             return self._err(f"Failed to upsert utility price: {error}")
         return self._ok(data, message="Utility price upserted")
+
+    # ==================================================================
+    # USER PROFILE — AUTH SUPPORT
+    # ==================================================================
+
+    def get_user(self, domain: str, user_id: str) -> dict | None:
+        """
+        Fetch a single user profile row by ID and domain.
+
+        Args:
+            domain (str): Tenant domain (e.g. 'hebron-guide').
+            user_id (str): UUID of the user.
+
+        Returns:
+            dict | None: Raw user row, or None if not found / on error.
+
+        Example:
+            user = adapter.get_user("hebron-guide", "usr-uuid")
+        """
+        if not user_id or not domain:
+            return None
+
+        query = (
+            self._client.table("user_profiles")
+            .select("*")
+            .eq("id", user_id)
+            .eq("domain", domain)
+            .limit(1)
+        )
+        data, error = self._safe_execute(query)
+        if error or not data:
+            return None
+        return data[0]
+
+    def upsert_user(self, domain: str, user_data: dict) -> dict:
+        """
+        Insert or update a user profile row.
+
+        The caller must supply at minimum { id, domain }. All other fields
+        are merged via Supabase upsert on the (id, domain) conflict target.
+
+        Args:
+            domain (str): Tenant domain.
+            user_data (dict): User fields; must contain 'id'.
+
+        Returns:
+            dict: Standard envelope; data is the upserted row.
+
+        Example:
+            result = adapter.upsert_user("hebron-guide", {
+                "id": "usr-uuid",
+                "email": "ahmad@example.com",
+                "display_name": "Ahmad",
+            })
+        """
+        if not user_data.get("id"):
+            return self._err("user_data must contain 'id'")
+
+        record = {**user_data, "domain": domain}
+        query = self._client.table("user_profiles").upsert(
+            record, on_conflict="id,domain"
+        )
+        data, error = self._safe_execute(query)
+        if error:
+            return self._err(f"Failed to upsert user: {error}")
+        return self._ok(data)
+
+    def update_user(self, domain: str, user_id: str, partial: dict) -> dict:
+        """
+        Patch specific fields on an existing user profile.
+
+        Args:
+            domain (str): Tenant domain.
+            user_id (str): UUID of the user to update.
+            partial (dict): Fields to overwrite (never the full row required).
+
+        Returns:
+            dict: Standard envelope; data is the updated row.
+
+        Example:
+            result = adapter.update_user(
+                "hebron-guide", "usr-uuid", {"metadata": {"refresh_token": "..."}}
+            )
+        """
+        if not user_id or not domain:
+            return self._err("user_id and domain are required")
+        if not partial:
+            return self._err("partial update payload cannot be empty")
+
+        query = (
+            self._client.table("user_profiles")
+            .update(partial)
+            .eq("id", user_id)
+            .eq("domain", domain)
+        )
+        data, error = self._safe_execute(query)
+        if error:
+            return self._err(f"Failed to update user: {error}")
+        return self._ok(data)
 
     # ==================================================================
     # USER / POINTS HELPER
