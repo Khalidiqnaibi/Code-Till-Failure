@@ -1,11 +1,20 @@
-from flask import Blueprint, request, jsonify , current_app
+from flask import Blueprint, request, jsonify , current_app , g
 from services.auth_service import AuthService
 from services.users_service import UserService
+from dotenv import load_dotenv
+import os
+from db.supabase_adapter import SupabaseAdapter
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
-auth_service = AuthService(current_app.config["ADAPTER"])
-user_service = UserService(current_app.config["ADAPTER"])
+load_dotenv("C:\\Users\\khaaf\\Documents\\GitHub\\Code-Till-Failure\\.env")
+adapter = SupabaseAdapter(
+    "https://mlosocwinwylysatnbtm.supabase.co",
+    "sb_publishable_BXfqbXN8BV7pqEvMCdPexA_CeV1ERGQ"
+)
+
+auth_service = AuthService(adapter)
+user_service = UserService(adapter)
 
 # ---------------------------
 # EXISTS

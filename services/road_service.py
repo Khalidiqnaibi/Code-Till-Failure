@@ -2,7 +2,7 @@ from supabase import create_client
 from math import radians, cos, sin, asin, sqrt
 import os
 
-supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
+supabase = create_client("https://mlosocwinwylysatnbtm.supabase.co", "sb_publishable_BXfqbXN8BV7pqEvMCdPexA_CeV1ERGQ")
 
 VERIFICATION_THRESHOLD = 25
 DEFAULT_RADIUS_KM       = 10.0

@@ -17,32 +17,29 @@ from routes.shop_route     import shops_bp
 
 load_dotenv()
 adapter = SupabaseAdapter(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_KEY")
+    "https://mlosocwinwylysatnbtm.supabase.co",
+    "sb_publishable_BXfqbXN8BV7pqEvMCdPexA_CeV1ERGQ"
 )
 
-print(adapter.list_document_templates())
-def create_app():
-    app = Flask(__name__)
-    CORS(app)
-    app.secret_key = os.environ.get("SECRET")
-    
-    app.config["ADAPTER"] = adapter
+app = Flask(__name__)
+CORS(app)
+app.secret_key = os.environ.get("SECRET")
 
-    # Register all module blueprints
-    app.register_blueprint(roads_bp)
-    app.register_blueprint(shops_bp)
-    app.register_blueprint(auth_bp)
 
-    @app.get("/health")
-    def health():
-        return {"status": "ok", "app": "Hebron Guide API"}
+# Register all module blueprints
+app.register_blueprint(roads_bp)
+app.register_blueprint(shops_bp)
+app.register_blueprint(auth_bp)
 
-    return app
+app.config.setdefault("adapter", adapter) 
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "app": "Hebron Guide API"}
+
 
 
 
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True, port=5000)
     
