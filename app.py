@@ -9,16 +9,12 @@ import os
 from flask import Flask , render_template
 from routes.auth import auth_blueprint
 from flask_cors import CORS
-# from routes.doc_route import doc_blueprint
-# from routes.shop_route import shop_blueprint
-# from routes.ticket_route import ticket_blueprint
-
 from dotenv import load_dotenv
 
-from routes.tickets   import tickets_bp
-from routes.documents import documents_bp
-from routes.roads     import roads_bp
-from routes.shops     import shops_bp
+from .routes.ticket_route   import tickets_bp
+from .routes.doc_route import documents_bp
+from .routes.roads_route     import roads_bp
+from .routes.shop_route     import shops_bp
 
 def create_app():
     app = Flask(__name__)
@@ -30,6 +26,7 @@ def create_app():
     app.register_blueprint(documents_bp)
     app.register_blueprint(roads_bp)
     app.register_blueprint(shops_bp)
+    app.register_blueprint(auth_blueprint)
 
     @app.get("/health")
     def health():

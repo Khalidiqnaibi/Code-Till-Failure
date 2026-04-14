@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from services.document_service import (
+from services.doc_service import (
     create_document,
     list_documents,
     get_document_by_id,
