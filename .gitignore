@@ -1,1 +1,3 @@
 *.pyc
+/ai/data
+/ai/data_raw
