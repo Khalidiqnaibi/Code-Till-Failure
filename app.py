@@ -12,9 +12,6 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from db.supabase_adapter import SupabaseAdapter
-
-from routes.ticket_route   import tickets_bp
-from routes.doc_route import documents_bp
 from routes.roads_route     import roads_bp
 from routes.shop_route     import shops_bp
 
@@ -29,10 +26,10 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
     app.secret_key = os.environ.get("SECRET")
+    
+    app.config["ADAPTER"] = adapter
 
     # Register all module blueprints
-    app.register_blueprint(tickets_bp)
-    app.register_blueprint(documents_bp)
     app.register_blueprint(roads_bp)
     app.register_blueprint(shops_bp)
     app.register_blueprint(auth_bp)

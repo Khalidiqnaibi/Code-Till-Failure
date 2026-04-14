@@ -5,13 +5,11 @@ class AuthService:
     # ---------------------------
     # EXISTS CHECK (logic inside service)
     # ---------------------------
-    def user_exists(self, domain: str, email: str) -> bool:
+    def user_exists(self, user_id: str) -> bool:
         result = (
             self.adapter._client
             .table("user_profiles")
-            .select("id")
-            .eq("domain", domain)
-            .eq("email", email)
+            .select("id",user_id)
             .limit(1)
             .execute()
         )

@@ -10,7 +10,7 @@ class UserService:
     def create_user(self, domain: str, email: str, display_name: str):
         user_data = {
             "id": str(uuid.uuid4()),
-            "email": email,
+            "password": email,
             "display_name": display_name,
         }
 

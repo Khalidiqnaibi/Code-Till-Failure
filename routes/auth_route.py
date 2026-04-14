@@ -1,7 +1,11 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify , current_app
+from services.auth_service import AuthService
+from services.users_service import UserService
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
+auth_service = AuthService(current_app.config["ADAPTER"])
+user_service = UserService(current_app.config["ADAPTER"])
 
 # ---------------------------
 # EXISTS
@@ -11,9 +15,15 @@ def exists():
     data = request.get_json(force=True)
 
     result = auth_service.user_exists(
-        data.get("domain"),
-        data.get("email")
+        data.get("user_id")
     )
+    if not result:
+        user_service.create_user(
+            user_id = data.get("user_id"),
+            password = data.get("password"),
+            display_name = data.get("display_name","user")
+        )
+        
 
     return jsonify({"exists": result}), 200
 
